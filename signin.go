@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -10,8 +11,8 @@ import (
 
 // Signin ...
 func Signin(w http.ResponseWriter, r *http.Request) {
-	var creds Credentials
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	var userAuth User
+	err := json.NewDecoder(r.Body).Decode(&userAuth)
 	if err != nil {
 		resp, _ := json.Marshal(ErrorResp{
 			Message: err.Error(),
@@ -23,9 +24,20 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expectedPassword, ok := users[creds.Email]
+	db, ok := r.Context().Value("db").(*sql.DB)
+	if !ok {
+		http.Error(w, "could not get database connection pool from context", 500)
+		return
+	}
 
-	if !ok || expectedPassword != creds.Password {
+	var user User
+	err = user.Get(db, userAuth.Email)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if !user.IsHashEqual(userAuth.CreateHash(userAuth.Password)) {
 		resp, _ := json.Marshal(ErrorResp{
 			Message: "Incorrect Credentials.",
 		})
@@ -38,7 +50,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &Claims{
-		Email: creds.Email,
+		Email: user.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

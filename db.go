@@ -52,3 +52,33 @@ func GetDBCredentials(fileName string) DBCredentials {
 	}
 	return c
 }
+
+// Init ...
+func (s *Storage) Init() error {
+	sql := `CREATE TABLE IF NOT EXISTS users (
+		id SERIAL PRIMARY KEY,
+		email character varying(255),
+		password character varying(255)
+	);`
+	_, err := s.DB.Exec(sql)
+	if err != nil {
+		log.Printf("Error create PG table\n%s\n", err)
+		return err
+	}
+
+	sql = `CREATE UNIQUE INDEX IF NOT EXISTS users_pkey ON users(id int4_ops);`
+	_, err = s.DB.Exec(sql)
+	if err != nil {
+		log.Printf("Error create PG index\n%s\n", err)
+		return err
+	}
+
+	sql = `CREATE UNIQUE INDEX IF NOT EXISTS users_email_key ON users(email text_ops);`
+	_, err = s.DB.Exec(sql)
+	if err != nil {
+		log.Printf("Error create PG index\n%s\n", err)
+		return err
+	}
+
+	return nil
+}

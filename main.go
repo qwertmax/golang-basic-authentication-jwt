@@ -28,12 +28,6 @@ type ErrorResp struct {
 
 var jwtKey = []byte("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 
-// TODO: rmeove to Database
-var users = map[string]string{
-	"test@mail.ru":  "111",
-	"user2@mail.ru": "222",
-}
-
 // ContextInjector ...
 type ContextInjector struct {
 	ctx context.Context
@@ -50,6 +44,9 @@ func main() {
 		log.Fatalln(err)
 		return
 	}
+	defer db.DB.Close()
+
+	db.Init()
 
 	ctx := context.WithValue(context.Background(), "db", db.DB)
 
