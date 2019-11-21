@@ -3,11 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
-	"gopkg.in/yaml.v2"
 )
 
 // Storage ...
@@ -41,15 +41,43 @@ func (s *Storage) Connect(params DBCredentials) error {
 
 // GetDBCredentials ...
 func GetDBCredentials(fileName string) DBCredentials {
-	var c DBCredentials
-	yamlFile, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+	c := DBCredentials{
+		Host:     "0.0.0.0",
+		Port:     5432,
+		User:     "postgres",
+		Password: "my-secret-password",
+		DbName:   "golang",
 	}
-	err = yaml.Unmarshal(yamlFile, &c)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+
+	_, ok := os.LookupEnv("DB_HOST")
+	if ok {
+		c.Host = os.Getenv("DB_HOST")
 	}
+
+	_, ok = os.LookupEnv("DB_PORT")
+	if !ok {
+		port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+		if err != nil {
+			log.Println(err.Error())
+		}
+		c.Port = port
+	}
+
+	_, ok = os.LookupEnv("DB_USER")
+	if !ok {
+		c.User = os.Getenv("DB_USER")
+	}
+
+	_, ok = os.LookupEnv("DB_PASSWORD")
+	if !ok {
+		c.Password = os.Getenv("DB_PASSWORD")
+	}
+
+	_, ok = os.LookupEnv("DB_NAME")
+	if !ok {
+		c.DbName = os.Getenv("DB_NAME")
+	}
+
 	return c
 }
 

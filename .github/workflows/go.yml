@@ -1,0 +1,19 @@
+name: Go
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout master brancch
+      uses: actions/checkout@master
+
+    - name: Build Image
+      run: |
+        docker build -t docker.pkg.github.com/qwertmax/golang-basic-authentication-jwt/golang-basic-authentication-jwt:latest .
+
+    - name: Push Image to Github Packages
+      run: |
+        docker push docker.pkg.github.com/qwertmax/golang-basic-authentication-jwt/golang-basic-authentication-jwt:latest
