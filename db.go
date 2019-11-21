@@ -54,8 +54,8 @@ func GetDBCredentials(fileName string) DBCredentials {
 		c.Host = os.Getenv("DB_HOST")
 	}
 
-	_, ok = os.LookupEnv("DB_PORT")
-	if !ok {
+	port, ok := os.LookupEnv("DB_PORT")
+	if !ok || len(port) > 0 {
 		port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 		if err != nil {
 			log.Println(err.Error())
