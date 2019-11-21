@@ -16,4 +16,5 @@ jobs:
 
     - name: Push Image to Github Packages
       run: |
+        docker images
         docker push docker.pkg.github.com/qwertmax/golang-basic-authentication-jwt/golang-basic-authentication-jwt:latest
