@@ -1,18 +1,17 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
 // Credentials ...
 type Credentials struct {
-	Password string `json:"password"`
 	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // Claims ...
@@ -35,71 +34,27 @@ var users = map[string]string{
 	"user2@mail.ru": "222",
 }
 
-// Signin ...
-func Signin(w http.ResponseWriter, r *http.Request) {
-	var creds Credentials
-	err := json.NewDecoder(r.Body).Decode(&creds)
-	if err != nil {
-		resp, _ := json.Marshal(ErrorResp{
-			Message: err.Error(),
-		})
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
-		return
-	}
-
-	expectedPassword, ok := users[creds.Email]
-
-	if !ok || expectedPassword != creds.Password {
-		resp, _ := json.Marshal(ErrorResp{
-			Message: "Incorrect Credentials.",
-		})
-
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
-		return
-	}
-
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &Claims{
-		Email: creds.Email,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		resp, _ := json.Marshal(ErrorResp{
-			Message: err.Error(),
-		})
-
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
-		return
-	}
-
-	resp, _ := json.Marshal(struct {
-		Token string `json:"token"`
-	}{
-		Token: tokenString,
-	})
-
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
-	return
+// ContextInjector ...
+type ContextInjector struct {
+	ctx context.Context
+	h   http.Handler
 }
 
+func (ci *ContextInjector) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ci.h.ServeHTTP(w, r.WithContext(ci.ctx))
+}
 func main() {
-	http.HandleFunc("/signin", Signin)
-	// http.HandleFunc("/welcome", Welcome)
-	// http.HandleFunc("/refresh", Refresh)
+	db := Storage{}
+	err := db.Connect(GetDBCredentials("config.yml"))
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+
+	ctx := context.WithValue(context.Background(), "db", db.DB)
+
+	http.Handle("/signin", &ContextInjector{ctx, http.HandlerFunc(Signin)})
+	http.Handle("/signup", &ContextInjector{ctx, http.HandlerFunc(Signup)})
 
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
