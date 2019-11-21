@@ -54,8 +54,8 @@ func GetDBCredentials(fileName string) DBCredentials {
 		c.Host = os.Getenv("DB_HOST")
 	}
 
-	port, ok := os.LookupEnv("DB_PORT")
-	if !ok || len(port) > 0 {
+	_, ok = os.LookupEnv("DB_PORT")
+	if ok {
 		port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 		if err != nil {
 			log.Println(err.Error())
@@ -64,17 +64,17 @@ func GetDBCredentials(fileName string) DBCredentials {
 	}
 
 	_, ok = os.LookupEnv("DB_USER")
-	if !ok {
+	if ok {
 		c.User = os.Getenv("DB_USER")
 	}
 
 	_, ok = os.LookupEnv("DB_PASSWORD")
-	if !ok {
+	if ok {
 		c.Password = os.Getenv("DB_PASSWORD")
 	}
 
 	_, ok = os.LookupEnv("DB_NAME")
-	if !ok {
+	if ok {
 		c.DbName = os.Getenv("DB_NAME")
 	}
 
