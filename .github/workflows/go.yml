@@ -14,6 +14,12 @@ jobs:
       run: |
         docker build -t docker.pkg.github.com/qwertmax/golang-basic-authentication-jwt/golang-basic-authentication-jwt:latest .
 
+    - name: Docker Login
+      run: |
+        echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Push Image to Github Packages
       run: |
         docker images
