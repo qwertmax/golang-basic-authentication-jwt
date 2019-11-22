@@ -20,7 +20,7 @@ How to use an image of docker container
 
 or Docker Compose
 
-```
+```yml
 version: '3'
 
 services:
