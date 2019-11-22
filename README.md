@@ -6,10 +6,15 @@
 
 default values for ENV are:
 
+
 `DB_HOST=0.0.0.0`
+
 `DB_PORT=5432`
+
 `DB_USER=postgres`
+
 `DB_PASSWORD=my-secret-password`
+
 `DB_NAME=golang`
 
 
