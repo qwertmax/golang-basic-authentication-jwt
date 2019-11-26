@@ -41,15 +41,12 @@ func main() {
 	db := Storage{}
 	err := db.Connect(GetDBCredentials())
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("db.Connect", err)
 		return
 	}
 	defer db.DB.Close()
 
-	err = db.Init()
-	if err != nil {
-		log.Fatal(err)
-	}
+	db.Init()
 
 	ctx := context.WithValue(context.Background(), "db", db.DB)
 
