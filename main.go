@@ -46,7 +46,10 @@ func main() {
 	}
 	defer db.DB.Close()
 
-	db.Init()
+	err = db.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ctx := context.WithValue(context.Background(), "db", db.DB)
 
