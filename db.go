@@ -40,7 +40,7 @@ func (s *Storage) Connect(params DBCredentials) error {
 }
 
 // GetDBCredentials ...
-func GetDBCredentials(fileName string) DBCredentials {
+func GetDBCredentials() DBCredentials {
 	c := DBCredentials{
 		Host:     "0.0.0.0",
 		Port:     5432,

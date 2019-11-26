@@ -39,7 +39,7 @@ func (ci *ContextInjector) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 func main() {
 	db := Storage{}
-	err := db.Connect(GetDBCredentials("config.yml"))
+	err := db.Connect(GetDBCredentials())
 	if err != nil {
 		log.Fatalln(err)
 		return
