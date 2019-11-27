@@ -21,6 +21,10 @@ default values for ENV are:
 
 How to use an image of docker container
 
+before you needs to auth via github username 
+
+`docker login docker.pkg.github.com --username <github username>``
+
 `docker pull docker.pkg.github.com/qwertmax/golang-basic-authentication-jwt/golang-basic-authentication-jwt:latest`
 
 or Docker Compose
